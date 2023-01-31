@@ -129,8 +129,7 @@ interval_5min_weekday <- new_dataset_weekday %>%
   summarize(int_steps=mean(new_steps, na.rm=TRUE))
 ```
 
-    ## `summarise()` has grouped output by 'weekday'. You can override using the
-    ## `.groups` argument.
+    ## `summarise()` has grouped output by 'weekday'. You can override using the `.groups` argument.
 
 ``` r
 # abstruct weekday data. And plot.
