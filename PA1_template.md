@@ -9,7 +9,7 @@ df <- read.csv("activity.csv")
 
 ## What is mean total number of steps taken per day?
 
-![](PA1_template_files/figure-markdown_github/pressure-1.png)
+![](figurepressure-1.png)
 
     ## [1] 10766.19
 
@@ -129,7 +129,8 @@ interval_5min_weekday <- new_dataset_weekday %>%
   summarize(int_steps=mean(new_steps, na.rm=TRUE))
 ```
 
-    ## `summarise()` has grouped output by 'weekday'. You can override using the `.groups` argument.
+    ## `summarise()` has grouped output by 'weekday'. You can override using the
+    ## `.groups` argument.
 
 ``` r
 # abstruct weekday data. And plot.
