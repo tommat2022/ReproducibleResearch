@@ -9,7 +9,19 @@ df <- read.csv("activity.csv")
 
 ## What is mean total number of steps taken per day?
 
-![](figurepressure-1.png)
+``` r
+steps_per_day <- df %>% 
+  group_by(date) %>% 
+  summarize(total_steps=sum(steps))
+hist(steps_per_day$total_steps)
+```
+
+![](PA1_template_files/figure-markdown_github/pressure-1.png)
+
+``` r
+mean_steps_per_day <- mean(steps_per_day$total_steps, na.rm=TRUE)
+mean_steps_per_day
+```
 
     ## [1] 10766.19
 
