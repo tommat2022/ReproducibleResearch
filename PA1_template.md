@@ -1,13 +1,18 @@
 ## Loading and preprocessing the data
 
+Question 1: Code for reading in the dataset and/or processing the data
+
 ``` r
 suppressMessages(library(dplyr))
-suppressMessages(library(tidyr))
 suppressMessages(library(lubridate))
+suppressMessages(library(ggplot2))
 df <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
+
+Question 2: Histogram of the total number of steps taken each day
+Question 3: Mean and median number of steps taken each day
 
 ``` r
 steps_per_day <- df %>% 
@@ -27,9 +32,7 @@ mean_steps_per_day
 
 ## What is the average daily activity pattern?
 
-1.  Make a time series plot (i.e.type = “l”) of the 5-minute interval
-    (x-axis) and the average number of steps taken, averaged across all
-    days (y-axis)
+Question 4: Time series plot of the average number of steps taken.
 
 ``` r
 interval_5min <- df %>% 
@@ -41,42 +44,39 @@ plot(interval_5min$interval, interval_5min$int_steps, type="l", ylab="number of 
 
 ![](PA1_template_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
-1.  Which 5-minute interval, on average across all the days in the
-    dataset, contains the maximum number of steps?
+Question 5: The 5-minute interval that, on average, contains the maximum
+number of steps
 
 ``` r
 max_step <- max(interval_5min$int_steps)
 max_5min <- interval_5min %>% 
   filter(int_steps == max_step)
+colnames(max_5min) <- c("The interval that contains the maximum number", "Maximum number of steps")
 max_5min
 ```
 
     ## # A tibble: 1 × 2
-    ##   interval int_steps
-    ##      <int>     <dbl>
-    ## 1      835      206.
+    ##   `The interval that contains the maximum number` `Maximum number of steps`
+    ##                                             <int>                     <dbl>
+    ## 1                                             835                      206.
 
 ## Imputing missing values
 
-1.  Calculate and report the total number of missing values in the
-    dataset (i.e. the total number of rows with NA.
+Question 6-1: Code to describe and show a strategy for imputing missing
+data. The number of row which contains missing values.
 
 ``` r
 include_NA <- df %>% 
   filter(is.na(steps))
 number_NA <- nrow(include_NA)
-number_NA
+paste("The number of missing values in steps is ", number_NA, ".")
 ```
 
-    ## [1] 2304
+    ## [1] "The number of missing values in steps is  2304 ."
 
-1.  Devise a strategy for filling in all of the missing values in the
-    dataset. The strategy does not need to be sophisticated. For
-    example, you could use the mean/median for that day, or the mean for
-    that 5-minute interval, etc.
-2.  Create a new dataset that is equal to the original dataset but with
-    the missing data filled in. “new_dataset” is the original dataset
-    but with the missing data filled in.
+Question 6-2: Devise a strategy for filling in all of the missing values
+in the dataset – I use the mean steps to fill the missin value. Question
+6-3: Create a new dataset – The name of new dataset is “new_dataset”.
 
 ``` r
 # I use mean values of day to fill the missing value
@@ -90,9 +90,8 @@ new_dataset <- df_add_mean %>%
   select(new_steps, date, interval)
 ```
 
-1.  Make a histogram of the total number of steps taken each day and
-    Calculate and report the mean and median total number of steps taken
-    per day.
+Question 7: Make a histogram of the total number of steps in new
+dataset. Calculate the mean and median.
 
 ``` r
 new_steps_per_day <-  new_dataset%>% 
@@ -105,23 +104,22 @@ hist(new_steps_per_day$total_steps)
 
 ``` r
 new_mean_steps_per_day <- mean(new_steps_per_day$total_steps, na.rm=TRUE)
-new_mean_steps_per_day
+paste("The mean total number of steps taken per day is ",round(new_mean_steps_per_day), ".")
 ```
 
-    ## [1] 10766.19
+    ## [1] "The mean total number of steps taken per day is  10766 ."
 
 ``` r
 new_median_steps_per_day <- median(new_steps_per_day$total_steps, na.rm=TRUE)
-new_median_steps_per_day
+paste("The mean total number of steps taken per day is ",round(new_median_steps_per_day), ".")
 ```
 
-    ## [1] 10766.19
+    ## [1] "The mean total number of steps taken per day is  10766 ."
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-1.  Create a new factor variable in the dataset with two levels –
-    “weekday” and “weekend” indicating whether a given date is a weekday
-    or weekend day.
+Question 8-1: Create a new factor variable in the dataset with two
+levels – “weekday” and “weekend”
 
 ``` r
 new_dataset_weekday<- new_dataset %>% 
@@ -129,32 +127,19 @@ new_dataset_weekday<- new_dataset %>%
   mutate(weekday = ifelse(weekday %in% c(2,3,4,5,6),"weekday","weekend"))
 ```
 
-1.  Make a panel plot containing a time series plot (i.e.type = “l”) of
-    the 5-minute interval (x-axis) and the average number of steps
-    taken, averaged across all weekday days or weekend days (y-axis).
-
-Plot weekday data as red line, and weekend data as blue line.
+Question 8-2: Panel plot comparing the average number of steps taken per
+5-minute interval across weekdays and weekends
 
 ``` r
+options(dplyr.summarise.inform = FALSE)
 interval_5min_weekday <- new_dataset_weekday %>% 
   group_by(weekday,interval) %>% 
   summarize(int_steps=mean(new_steps, na.rm=TRUE))
-```
-
-    ## `summarise()` has grouped output by 'weekday'. You can override using the
-    ## `.groups` argument.
-
-``` r
-# abstruct weekday data. And plot.
-weekday_data <- interval_5min_weekday %>% 
-  filter(weekday == "weekday")
-plot(weekday_data$interval, weekday_data$int_steps, type="l", ylab="number of steps", xlab="interval",col="red")
-par(new=T)
-
-#abstract weekend data. And plot.
-weekend_data <- interval_5min_weekday %>% 
-  filter(weekday == "weekend")
-plot(weekend_data$interval, weekend_data$int_steps, type="l", ylab="number of steps", xlab="interval", col="blue")
+interval_5min_weekday %>% 
+  ggplot(aes(x=interval, y=int_steps, color=weekday)) +
+  geom_line() +
+  facet_grid(weekday ~ .) +
+  theme_bw()
 ```
 
 ![](PA1_template_files/figure-markdown_github/unnamed-chunk-7-1.png)
